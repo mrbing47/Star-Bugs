@@ -11,11 +11,16 @@ public class Event {
     }
 
 
-    public Event(String eventId, String eventLatlng, String eventStartTime, String eventEndTime) {
-        this.eventId = eventId;
+    public Event(String eventLatlng, String eventStartTime) {
+
+        //this.eventId = eventId;
+        /*TODO
+            Add the id generating function
+            and also add all the functions from KPIT project
+         */
         this.eventLatlng = eventLatlng;
         this.eventStartTime = eventStartTime;
-        this.eventEndTime = eventEndTime;
+        this.eventEndTime = "0";
     }
 
     public String getEventId() {

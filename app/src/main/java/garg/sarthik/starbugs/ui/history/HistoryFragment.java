@@ -9,9 +9,13 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
+import java.util.List;
+
+import garg.sarthik.starbugs.POJO.Event;
 import garg.sarthik.starbugs.R;
 
 public class HistoryFragment extends Fragment {
@@ -23,11 +27,10 @@ public class HistoryFragment extends Fragment {
         historyViewModel =
                 ViewModelProviders.of(this).get(HistoryViewModel.class);
         View root = inflater.inflate(R.layout.fragment_history, container, false);
-        final TextView textView = root.findViewById(R.id.text_dashboard);
-        historyViewModel.getText().observe(this, new Observer<String>() {
+        historyViewModel.getEvents().observe((LifecycleOwner) getContext(), new Observer<List<Event>>() {
             @Override
-            public void onChanged(@Nullable String s) {
-                textView.setText(s);
+            public void onChanged(List<Event> events) {
+
             }
         });
         return root;
