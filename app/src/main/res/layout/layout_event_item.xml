@@ -28,13 +28,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Event Location"
-                android:textSize="20sp" />
+                android:fontFamily="@font/josefinsans_regular"
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/tvItemDate"
+                android:textSize="12sp"
+                android:layout_marginTop="8dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="12dp"
+                android:fontFamily="@font/josefinsans_regular"
                 android:hint="Date and time" />
 
         </LinearLayout>

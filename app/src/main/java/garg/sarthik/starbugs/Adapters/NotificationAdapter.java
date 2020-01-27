@@ -1,6 +1,9 @@
 package garg.sarthik.starbugs.Adapters;
 
 import android.content.Context;
+import android.location.Address;
+import android.location.Geocoder;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,18 +20,22 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 
 import garg.sarthik.starbugs.POJO.Event;
 import garg.sarthik.starbugs.R;
+import garg.sarthik.starbugs.Statics.Functions;
 
 
 public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapter.ViewHolder> {
 
 
-    List<Event> events;
-    Context ctx;
+    private String TAG = "NA";
 
+    private List<Event> events;
+    private Context ctx;
 
     public NotificationAdapter(List<Event> events, Context ctx) {
         this.events = events;
@@ -42,27 +49,39 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, final int position) {
 
         Event event = events.get(position);
 
-        holder.tvItemLocation.setText(event.getEventLatlng());
-        holder.tvItemDate.setText(event.getEventStartTime());
+        LatLng latlng = Functions.getLatLng(event.getEventLatlng());
 
-        /* TODO
-            Extract LatLng from event.getEventLatLng() and store them to the following fn variables
-         */
+        Geocoder geocoder = new Geocoder(ctx, Locale.getDefault());
 
-        double lat = 90;
-        double lng = 40;
 
-        if(holder.gMap != null)
-        {
-            holder.gMap.getUiSettings().setAllGesturesEnabled(false);
-            holder.gMap.addMarker(new MarkerOptions().position(new LatLng(lat, lng)).title(event.getEventLatlng()).draggable(false));
-            holder.gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), 12));
+        try {
+            String address =  geocoder.getFromLocation(latlng.latitude, latlng.longitude, 1).get(0).getAddressLine(0);
+            holder.tvItemLocation.setText(address);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+        holder.tvItemDate.setText(Functions.formatDateTime(event.getEventStartTime()));
 
+        holder.mapView.onCreate(null);
+        holder.mapView.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(GoogleMap googleMap) {
+                googleMap.getUiSettings().setAllGesturesEnabled(false);
+
+                Event event = events.get(position);
+                LatLng latlng = Functions.getLatLng(event.getEventLatlng());
+
+                googleMap.addMarker(new MarkerOptions().position(latlng).title(event.getEventLatlng()).draggable(false));
+                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latlng, 13));
+
+                Log.i(TAG, "" + latlng.latitude + " " + latlng.longitude);
+            }
+        });
+        holder.mapView.onResume();
 
     }
 
@@ -71,9 +90,8 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         return events.size();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder implements OnMapReadyCallback {
+    class ViewHolder extends RecyclerView.ViewHolder{
 
-        GoogleMap gMap = null;
         MapView mapView;
         TextView tvItemDate;
         TextView tvItemLocation;
@@ -85,13 +103,8 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             tvItemLocation = itemView.findViewById(R.id.tvItemLocation);
             mapView = itemView.findViewById(R.id.itemMapView);
 
-            mapView.getMapAsync(this);
 
         }
 
-        @Override
-        public void onMapReady(GoogleMap googleMap) {
-            gMap = googleMap;
-        }
     }
 }
